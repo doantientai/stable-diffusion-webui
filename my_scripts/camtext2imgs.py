@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
         # Define the codec and create a video writer object
         codec = cv2.VideoWriter_fourcc(*"mp4v")
-        out = cv2.VideoWriter(args.output, codec, 20.0, (width, height))
+        out = cv2.VideoWriter(args.output, codec, 1, (width, height))
 
         # Save params to json
         params = {
