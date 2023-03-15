@@ -66,6 +66,9 @@ if __name__ == "__main__":
 
     # Create a video capture object
     cap = cv2.VideoCapture(0)
+    # Get the frame width and height
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # Initialize variables for FPS calculation
     fps = 0
@@ -76,10 +79,6 @@ if __name__ == "__main__":
         if args.output[-4:] != ".mp4":
             raise "ERROR: --output must end with .mp4"
         os.makedirs(os.path.dirname(args.output), exist_ok=True)
-
-        # Get the frame width and height
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         # Define the codec and create a video writer object
         codec = cv2.VideoWriter_fourcc(*"mp4v")
@@ -137,7 +136,12 @@ if __name__ == "__main__":
 
             # Show the frame in a window
             cv2.imshow("Camera", frame)
-            out.write(frame)
+
+            # Save to the video
+            if args.output is not None:
+                out.write(frame)
+
+            cap.set(cv2.CAP_PROP_POS_FRAMES, -1)
 
         # Check if the user presses 'q' key
         key = cv2.waitKey(1) & 0xFF
