@@ -13,7 +13,9 @@ import os
 import json
 
 
-def resquest_img2img(img_bgr, prompt, step=5, strength=0.45, seed=-1):
+def resquest_img2img(
+    img_bgr, prompt, step=5, strength=0.45, seed=-1, server_url="http://127.0.0.1:7860"
+):
     # img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     img = img_bgr
     # Encode
@@ -106,6 +108,7 @@ if __name__ == "__main__":
                 step=args.step,
                 strength=args.strength,
                 seed=args.seed,
+                server_url=args.server,
             )
             # Increment the frame count
             frame_count += 1
