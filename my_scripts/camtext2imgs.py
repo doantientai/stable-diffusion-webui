@@ -16,7 +16,6 @@ import json
 def resquest_img2img(
     img_bgr, prompt, step=5, strength=0.45, seed=-1, server_url="http://127.0.0.1:7860"
 ):
-    # img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     img = img_bgr
     # Encode
     img_bytes = cv2.imencode(".jpg", img)[1].tobytes()
@@ -31,16 +30,12 @@ def resquest_img2img(
     }
     response = requests.post(url=f"{server_url}/sdapi/v1/img2img", json=payload)
     img_str = response.json()["images"]
-    # image = Image.open(io.BytesIO(base64.b64decode(r[0].split(",", 1)[0])))
-    # image.save("output.png")
 
     # Decode
     img_bytes = base64.b64decode(img_str[0].split(",", 1)[0])
     img_array = np.frombuffer(img_bytes, dtype=np.uint8)
     res_rgb = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-    # res_bgr = cv2.cvtColor(res_rgb, cv2.COLOR_RGB2BGR)
-    # cv2.imwrite("res_bgr.png", res_bgr)
-    # exit()
+
     return res_rgb
 
 
@@ -68,6 +63,9 @@ if __name__ == "__main__":
 
     # Create a video capture object
     cap = cv2.VideoCapture(0)
+    print("sleeping a bit before starting")
+    time.sleep(5)
+
     # Get the frame width and height
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -126,16 +124,7 @@ if __name__ == "__main__":
                 start_time = time.time()
                 frame_count = 0
 
-            # Put the FPS text on the frame
-            cv2.putText(
-                frame,
-                f"FPS: {fps:.2f}",
-                (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0, 255, 0),
-                2,
-            )
+            print(f"FPS: {fps:.2f}")
 
             # Show the frame in a window
             cv2.imshow("Camera", frame)
@@ -143,6 +132,7 @@ if __name__ == "__main__":
             # Save to the video
             if args.output is not None:
                 out.write(frame)
+                # cv2.imwrite(f"{args.output[:-4]}_{frame_count}.png", frame)
 
             cap.set(cv2.CAP_PROP_POS_FRAMES, -1)
 
@@ -153,5 +143,5 @@ if __name__ == "__main__":
 
     # Release the video capture object, video writer object and destroy all windows
     cap.release()
-    out.release()
+    out.release() if args.output is not None else print()
     cv2.destroyAllWindows()
