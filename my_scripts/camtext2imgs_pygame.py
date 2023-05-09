@@ -13,6 +13,7 @@ import json
 import pygame
 import pygame.camera
 import threading
+from pynput import keyboard
 
 
 def resquest_img2img(
@@ -40,10 +41,20 @@ def resquest_img2img(
 
     return res_rgb
 
+def on_press(key):
+    global text
+    try:
+        # get the digit value of the pressed key
+        digit = int(key.char)
+        if digit in range(len(list_texts)):
+            text = list_texts[digit]
+    except AttributeError:
+        pass
+
 
 def parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--text", type=str, help="The text")
+    parser.add_argument("--text_file", type=str, help="The txt containing a style each line")
     parser.add_argument("--step", type=int, help="# of iterations")
     parser.add_argument(
         "--strength", type=float, help="The strength of noise (0. -> 1.)"
@@ -78,6 +89,7 @@ if __name__ == "__main__":
     start_time = time.time()
     frame_count = 0
 
+
     if args.output is not None:
         if args.output[-4:] != ".mp4":
             raise "ERROR: --output must end with .mp4"
@@ -89,7 +101,7 @@ if __name__ == "__main__":
 
         # Save params to json
         params = {
-            "text": args.text,
+            "text_file": args.text_file,
             "step": args.step,
             "strength": args.strength,
             "seed": args.seed,
@@ -98,6 +110,19 @@ if __name__ == "__main__":
             json.dump(params, f)
 
     running = True
+
+    list_texts = []
+    assert len(list_texts) < 10
+    with open(args.text_file) as f:
+        for _l in f.readlines():
+            list_texts.append(_l[:-1])
+        print(list_texts)
+    text = list_texts[0]
+
+    # create keyboard listener and start listening
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start()
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -109,7 +134,7 @@ if __name__ == "__main__":
 
         generated = resquest_img2img(
             frame,
-            prompt=args.text,
+            prompt=text,
             step=args.step,
             strength=args.strength,
             seed=args.seed,
@@ -143,3 +168,9 @@ if __name__ == "__main__":
 
     # Release the video capture object, video writer object and destroy all windows
     out.release() if args.output is not None else print()
+
+
+"""
+    Command example: 
+    python my_scripts/camtext2imgs_pygame.py --text_file /media/tai/12TB/ForFun/Art/SD/2023/stable-diffusion-webui/my_scripts/camtext_styles/list_style.txt --step 10 --strength 0.45 --seed 2023 --output /media/tai/12TB/ForFun/Art/SD/2023/stable-diffusion-webui/outputs/CamText2Vid/multi_styles.mp4
+"""
