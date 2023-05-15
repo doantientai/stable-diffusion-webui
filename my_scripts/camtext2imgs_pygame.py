@@ -77,12 +77,15 @@ if __name__ == "__main__":
     width = 640
     height = 480
 
+    width_full = 2560
+    height_full = 1440
+
     pygame.init()
     pygame.camera.init()
     cam = pygame.camera.Camera("/dev/video0", (width, height))
     cam.start()
 
-    screen = pygame.display.set_mode((width, height))
+    screen = pygame.display.set_mode((width_full, height_full), pygame.FULLSCREEN)
 
     # Initialize variables for FPS calculation
     fps = 0
@@ -143,8 +146,8 @@ if __name__ == "__main__":
         # Increment the frame count
         frame_count += 1
 
-        generated = cv2.resize(generated, (width, height))
         generated = cv2.flip(generated, 1)
+        generated = cv2.resize(generated, (width, height))
 
         # Calculate the FPS every second
         elapsed_time = time.time() - start_time
@@ -156,7 +159,8 @@ if __name__ == "__main__":
         print(f"FPS: {fps:.2f}")
 
         # Show the frame in a window
-        generated_rot = np.swapaxes(generated, 1, 0)
+        generated_full = cv2.resize(generated, (width_full, height_full))
+        generated_rot = np.swapaxes(generated_full, 1, 0)
         surface = pygame.surfarray.make_surface(generated_rot)
         screen.blit(surface, (0, 0))
         pygame.display.update()
